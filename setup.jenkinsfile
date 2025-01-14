@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        docker { image 'node:20-alpine' }
-    }
+    agent any
     options {
         preserveStashes buildCount: 5
         skipDefaultCheckout(true)
@@ -22,22 +20,40 @@ pipeline {
         }
 
         stage('HelloWorld') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
             steps {
-                bat 'node --version'
+                sh 'node --version'
             }
         }
 
         stage('Install Dependencies') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 // Install Node dependencies
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Run Tests') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 // Execute Jest tests
-                bat 'npm run test:ci'
+                sh 'npm run test:ci'
             }
             post {
                 always {
@@ -45,6 +61,15 @@ pipeline {
                     junit '**/junit.xml'
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs(cleanWhenNotBuilt: false,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true,
+                    notFailBuild: true)
         }
     }
 }
