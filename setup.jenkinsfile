@@ -1,0 +1,50 @@
+pipeline {
+    agent {
+        docker { image 'node:20-alpine' }
+    }
+    options {
+        preserveStashes buildCount: 5
+        skipDefaultCheckout(true)
+        disableConcurrentBuilds()
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                // Clean workspace
+                cleanWs()
+                // Get code from GitHub
+                // Marcar el directorio como seguro
+                sh 'git config --global --add safe.directory /var/jenkins_home/workspace/TestTemp'
+                // Realizar el checkout
+                checkout scmGit(branches: [[name: '*/develop']], extensions: [], userRemoteConfigs: [[credentialsId: 'GitHubDaniel', url: 'https://github.com/TeraShield/CoinControl.git']])
+            }
+        }
+
+        stage('HelloWorld') {
+            steps {
+                bat 'node --version'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // Install Node dependencies
+                bat 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Execute Jest tests
+                bat 'npm test'
+            }
+            post {
+                always {
+                    // Publish test results
+                    junit '**/junit.xml'
+                }
+            }
+        }
+    }
+}
