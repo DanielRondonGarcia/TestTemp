@@ -17,7 +17,7 @@ pipeline {
                 // Marcar el directorio como seguro
                 sh 'git config --global --add safe.directory /var/jenkins_home/workspace/TestTemp'
                 // Realizar el checkout
-                checkout scmGit(branches: [[name: '*/develop']], extensions: [], userRemoteConfigs: [[credentialsId: 'GitHubDaniel', url: 'https://github.com/TeraShield/CoinControl.git']])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'GitHubDaniel', url: 'https://github.com/DanielRondonGarcia/TestTemp.git']])
             }
         }
 
@@ -37,7 +37,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 // Execute Jest tests
-                bat 'npm test'
+                bat 'npm run test:ci'
             }
             post {
                 always {
